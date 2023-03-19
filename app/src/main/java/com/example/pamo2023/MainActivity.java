@@ -3,6 +3,7 @@ package com.example.pamo2023;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
@@ -13,14 +14,17 @@ import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
-    EditText weight, height;
-    TextView resultText;
-    String calculation, BMIresult;
+    EditText weight, height, age;
+    TextView resultText, gender;
+    String calculation, BMIresult, PPMresult;
     Button calculateBMIButton;
+    Switch genderSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,13 +33,29 @@ public class MainActivity extends AppCompatActivity {
 
         weight = findViewById(R.id.weight);
         height = findViewById(R.id.height);
+        age = findViewById(R.id.age);
         resultText = findViewById(R.id.resultText);
+        gender = findViewById(R.id.gender);
 
         calculateBMIButton = findViewById((R.id.calculateBMIButton));
         calculateBMIButton.setEnabled(false);
 
         weight.addTextChangedListener(textwatcher);
         height.addTextChangedListener(textwatcher);
+        age.addTextChangedListener(textwatcher);
+
+        genderSwitch = findViewById(R.id.genderSwitch);
+
+        genderSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if(genderSwitch.isChecked()){
+                    gender.setText("Kobieta");
+                }else{
+                    gender.setText("Mężczyzna");
+                }
+            }
+        });
     }
 
     private TextWatcher textwatcher = new TextWatcher() {
@@ -48,8 +68,9 @@ public class MainActivity extends AppCompatActivity {
         public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             String x = weight.getText().toString();
             String y = height.getText().toString();
+            String z = age.getText().toString();
 
-            if(!x.isEmpty() && !y.isEmpty()){
+            if(!x.isEmpty() && !y.isEmpty() && !z.isEmpty()){
                 calculateBMIButton.setEnabled(true);
             }else{
                 calculateBMIButton.setEnabled(false);
@@ -64,15 +85,24 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void calculateBMI(View view) {
+        if(genderSwitch.isChecked()){
+            gender.setText("Kobieta");
+        }else{
+            gender.setText("Mężczyzna");
+        }
+
         String x = weight.getText().toString();
         String y = height.getText().toString();
+        String z = age.getText().toString();
 
         closeKeyboard();
 
         float weightValue = Float.parseFloat(x);
-        float heightValue = Float.parseFloat(y) / 100;
+        float heightValue = Float.parseFloat(y);
+        float heightValueBMI = Float.parseFloat(y) / 100;
+        float ageValue = Float.parseFloat(z);
 
-        float bmi = weightValue / (heightValue * heightValue);
+        float bmi = weightValue / (heightValueBMI * heightValueBMI);
 
         if (bmi < 16) {
             BMIresult = "Wygłodzenie";
@@ -100,8 +130,22 @@ public class MainActivity extends AppCompatActivity {
             resultText.setTextColor(Color.RED);
         }
 
-        calculation = "Wynik:\t" + bmi + "\n" + BMIresult;
+        Intent intent = new Intent(MainActivity.this,Main2Activity.class);
+        intent.putExtra("resultBMIVariable", BMIresult);
+        intent.putExtra("scoreBMIVariable", bmi);
+        if(genderSwitch.isChecked()){
+            //Female
+            float ppm = 655.1f + (9.563f * weightValue) + (1.85f * heightValue) - (4.676f * ageValue);
+            intent.putExtra("scorePPMVariable", ppm);
+        }else{
+            //Male
+            float ppm = 65.5f + (13.75f * weightValue) + (5.003f * heightValue) - (6.775f * ageValue);
+            intent.putExtra("scorePPMVariable", ppm);
+        }
+        startActivity(intent);
 
+        calculation = "Wynik:\t" + bmi + "\n" + BMIresult;
+        //resultText.setVisibility(View.VISIBLE);
         resultText.setText(calculation);
     }
 
