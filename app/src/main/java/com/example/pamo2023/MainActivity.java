@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     EditText weight, height, age;
     TextView resultText, gender;
     String calculation, BMIresult, PPMresult;
-    Button calculateBMIButton;
+    Button calculateBMIButton, GraphButton, QuizButton;
     Switch genderSwitch;
 
     @Override
@@ -39,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
 
         calculateBMIButton = findViewById((R.id.calculateBMIButton));
         calculateBMIButton.setEnabled(false);
+
+        GraphButton = findViewById((R.id.GraphButton));
+        QuizButton = findViewById((R.id.QuizButton));
 
         weight.addTextChangedListener(textwatcher);
         height.addTextChangedListener(textwatcher);
@@ -147,6 +150,18 @@ public class MainActivity extends AppCompatActivity {
         calculation = "Wynik:\t" + bmi + "\n" + BMIresult;
         //resultText.setVisibility(View.VISIBLE);
         resultText.setText(calculation);
+    }
+
+    public void graphShow(View view){
+        closeKeyboard();
+        Intent intent = new Intent(MainActivity.this,GraphActivity.class);
+        startActivity(intent);
+    }
+
+    public void quizGame(View view){
+        closeKeyboard();
+        Intent intent = new Intent(MainActivity.this,QuizActivity.class);
+        startActivity(intent);
     }
 
     private void closeKeyboard(){
